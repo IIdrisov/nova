@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --primary: 0 0% 2%;
+  --secondary: 0 0% 45%;
+  --surface: 240 16% 96%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-primary font-sans antialiased;
+}
+
+@keyframes hero-blob-1 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  33% {
+    transform: translate(28%, 18%) scale(1.25);
+  }
+  66% {
+    transform: translate(12%, -14%) scale(0.92);
+  }
+}
+
+@keyframes hero-blob-2 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  33% {
+    transform: translate(-24%, 12%) scale(1.2);
+  }
+  66% {
+    transform: translate(-10%, -20%) scale(1.05);
+  }
+}
+
+@keyframes hero-blob-3 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  33% {
+    transform: translate(-18%, 26%) scale(1.28);
+  }
+  66% {
+    transform: translate(20%, 10%) scale(0.9);
+  }
+}
+
+.hero-gradient {
+  background: #050505;
+  isolation: isolate;
+}
+
+.hero-gradient-blobs {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-gradient-blobs span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(77px);
+  will-change: transform;
+}
+
+.hero-blob-1 {
+  top: -8%;
+  left: 2%;
+  height: 58%;
+  width: 75%;
+  background: radial-gradient(
+    circle,
+    rgb(255 43 47 / 0.82) 0%,
+    rgb(239 3 7 / 0.45) 38%,
+    transparent 68%
+  );
+  animation: hero-blob-1 7s ease-in-out infinite;
+}
+
+.hero-blob-2 {
+  top: 18%;
+  right: -5%;
+  height: 52%;
+  width: 58%;
+  background: radial-gradient(
+    circle,
+    rgb(255 0 4 / 0.75) 0%,
+    rgb(255 30 34 / 0.38) 40%,
+    transparent 66%
+  );
+  animation: hero-blob-2 8s ease-in-out infinite;
+}
+
+.hero-blob-3 {
+  bottom: -18%;
+  left: 22%;
+  height: 64%;
+  width: 68%;
+  background: radial-gradient(
+    circle,
+    rgb(255 59 62 / 0.7) 0%,
+    rgb(220 20 23 / 0.35) 42%,
+    transparent 70%
+  );
+  animation: hero-blob-3 9s ease-in-out infinite;
+}
+
+.advantages-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.advantages-scroll::-webkit-scrollbar {
+  display: none;
+}
