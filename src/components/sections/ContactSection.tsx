@@ -3,11 +3,39 @@
 import Image from "next/image";
 import { FormEvent, useState } from "react";
 
+type FormStatus = "idle" | "loading" | "success" | "error";
+
 export function ContactSection() {
   const [phone, setPhone] = useState("");
+  const [status, setStatus] = useState<FormStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setStatus("loading");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/v1/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setStatus("error");
+        setErrorMessage(data.error?.message ?? "Не удалось отправить заявку");
+        return;
+      }
+
+      setStatus("success");
+      setPhone("");
+    } catch {
+      setStatus("error");
+      setErrorMessage("Не удалось отправить заявку. Попробуйте позже.");
+    }
   }
 
   return (
@@ -29,25 +57,36 @@ export function ContactSection() {
             распространения
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label className="sr-only" htmlFor="phone">
-              Телефон
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="Телефон"
-              className="h-[58px] w-full rounded-2xl bg-[#f3f2f3] px-4 text-lg font-medium leading-6 text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-white/20"
-            />
-            <button
-              type="submit"
-              className="flex h-[58px] w-full items-center justify-center rounded-2xl bg-accent px-3 py-4 text-[17px] font-semibold leading-[26px] tracking-[0.1px] text-white transition-colors hover:bg-accent/90"
-            >
-              Отправить
-            </button>
-          </form>
+          {status === "success" ? (
+            <p className="rounded-2xl bg-white/10 px-4 py-4 text-lg leading-7 text-white">
+              Заявка отправлена. Мы свяжемся с вами в ближайшее время.
+            </p>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <label className="sr-only" htmlFor="phone">
+                Телефон
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                placeholder="Телефон"
+                disabled={status === "loading"}
+                className="h-[58px] w-full rounded-2xl bg-[#f3f2f3] px-4 text-lg font-medium leading-6 text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60"
+              />
+              {errorMessage ? (
+                <p className="text-sm leading-6 text-red-300">{errorMessage}</p>
+              ) : null}
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="flex h-[58px] w-full items-center justify-center rounded-2xl bg-accent px-3 py-4 text-[17px] font-semibold leading-[26px] tracking-[0.1px] text-white transition-colors hover:bg-accent/90 disabled:opacity-60"
+              >
+                {status === "loading" ? "Отправка..." : "Отправить"}
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </section>
