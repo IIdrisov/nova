@@ -1,32 +1,68 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import {
+  formatRuPhoneInput,
+  isRuPhoneComplete,
+  normalizeRuPhone,
+} from "@/shared/phone";
 
 type FormStatus = "idle" | "loading" | "success" | "error";
+
+const PHONE_PLACEHOLDER = "+7 (999) 123-45-67";
 
 export function ContactSection() {
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  function handlePhoneChange(event: ChangeEvent<HTMLInputElement>) {
+    setPhone(formatRuPhoneInput(event.target.value));
+    if (errorMessage) {
+      setErrorMessage("");
+    }
+  }
+
+  function handlePhoneFocus() {
+    if (!phone) {
+      setPhone("+7");
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("loading");
     setErrorMessage("");
+
+    if (!isRuPhoneComplete(phone)) {
+      setStatus("error");
+      setErrorMessage("Введите корректный номер телефона");
+      return;
+    }
+
+    const normalizedPhone = normalizeRuPhone(phone);
+    if (!normalizedPhone) {
+      setStatus("error");
+      setErrorMessage("Введите корректный номер телефона");
+      return;
+    }
+
+    setStatus("loading");
 
     try {
       const response = await fetch("/api/v1/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: normalizedPhone }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         setStatus("error");
-        setErrorMessage(data.error?.message ?? "Не удалось отправить заявку");
+        setErrorMessage(
+          data?.error?.message ?? "Не удалось отправить заявку",
+        );
         return;
       }
 
@@ -69,9 +105,12 @@ export function ContactSection() {
               <input
                 id="phone"
                 type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                placeholder="Телефон"
+                onChange={handlePhoneChange}
+                onFocus={handlePhoneFocus}
+                placeholder={PHONE_PLACEHOLDER}
                 disabled={status === "loading"}
                 className="h-[58px] w-full rounded-2xl bg-[#f3f2f3] px-4 text-lg font-medium leading-6 text-primary placeholder:text-primary/50 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-60"
               />
